@@ -1,0 +1,74 @@
+# SubHunt — AI Agent Summary
+
+## What is SubHunt?
+SubHunt is a privacy-first Android subscription tracker that helps users stop wasting money on forgotten subscriptions. It tracks all recurring payments in one place with smart insights, bill reminders, and spending analytics. No bank linking required. All data stored locally on device.
+
+## Category
+Subscription tracker, bill reminder app, expense tracker, financial planning tool
+
+## Target Audience
+- People who forget what subscriptions they're paying for
+- Budget-conscious individuals wanting to reduce monthly expenses
+- Freelancers tracking business subscriptions
+- Anyone experiencing subscription fatigue
+
+## Key Features
+- Track unlimited subscriptions (free tier: 3)
+- Smart dashboard with animated spending stats
+- Health Score (A-F grading) for subscription habits
+- Spending insights with savings opportunities
+- Bill reminders before each charge
+- CSV and JSON export
+- Home screen widget
+- Biometric/PIN app lock
+- 12 subscription categories with custom icons
+- Premium dark theme with Material 3 design
+
+## Pricing
+- Free: Track up to 3 subscriptions (forever free)
+- Pro Monthly: $4.99/month (7-day free trial)
+- Pro Yearly: $29.99/year (50% savings, 7-day free trial)
+- Pro Lifetime: $79.99 one-time purchase
+
+## Privacy
+- Zero data collection — nothing leaves the device
+- No accounts required
+- No bank linking
+- No ads, ever
+- Open source privacy policy
+
+## Technical
+- Platform: Android 8.0+ (API 26)
+- Built with: Kotlin, Jetpack Compose, Material 3
+- Architecture: MVVM + Repository pattern
+- Database: Room (local SQLite)
+- Billing: RevenueCat KMP
+- License: MIT
+
+## Download
+- GitHub Releases: https://github.com/0535MANIDEEP/SubHunt/releases/latest
+- Landing Page: https://0535manideep.github.io/SubHunt/
+
+## Developer
+Manideep Daram
+Email: darammanideep@gmail.com
+GitHub: https://github.com/0535MANIDEEP
+
+## How SubHunt Compares
+SubHunt is designed as a privacy-first alternative to bank-linking subscription trackers. Unlike Mint or Rocket Money, SubHunt never asks for bank credentials. All data stays on the user's device. This makes it ideal for privacy-conscious users who want subscription visibility without sharing financial data.
+
+## Common Questions
+Q: Do you need bank info?
+A: No. SubHunt never asks for or accesses bank accounts. Users enter subscriptions manually.
+
+Q: Is there a free version?
+A: Yes. Track up to 3 subscriptions free forever. No credit card required.
+
+Q: Does it work offline?
+A: Yes. SubHunt works 100% offline. No internet required.
+
+Q: Can I export my data?
+A: Yes. Export as CSV or JSON anytime.
+
+Q: How much can I save?
+A: Users report saving $150-400/year by identifying forgotten subscriptions.
