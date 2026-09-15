@@ -1,0 +1,35 @@
+# Built files
+*.iml
+.gradle
+/local.properties
+/.idea
+/build
+/captures
+.externalNativeBuild
+.cxx
+/android-local-backup/
+
+# Release signing
+release-keystore.jks
+*.jks
+*.keystore
+
+# Secrets (never commit)
+.env
+*.env
+local.properties
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Gradle
+.gradle/
+build/
+app/build/

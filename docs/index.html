@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubHunt — Track Every Subscription</title>
+    <meta name="description" content="Stop wasting money on forgotten subscriptions. SubHunt tracks all your recurring payments in one place with smart insights and bill reminders.">
+    <meta name="keywords" content="subscription tracker, bill tracker, recurring payments, save money, budget app, subscription management">
+    <meta property="og:title" content="SubHunt — Track Every Subscription">
+    <meta property="og:description" content="Stop wasting money on forgotten subscriptions. Track all your recurring payments in one place.">
+    <meta property="og:type" content="website">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a1a;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #6366f1;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .features {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+
+        .feature-card p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .pricing {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+        }
+
+        .pricing h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pricing .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card.featured {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.05);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-4px);
+        }
+
+        .badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            padding: 0.4rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #6366f1;
+            margin: 1rem 0;
+        }
+
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #64748b;
+        }
+
+        .pricing-card ul {
+            list-style: none;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .pricing-card li {
+            padding: 0.5rem 0;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pricing-card li::before {
+            content: '✓';
+            color: #6366f1;
+            font-weight: bold;
+        }
+
+        .social-proof {
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .social-proof h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #f1f5f9;
+        }
+
+        .trust-badges {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            text-align: center;
+        }
+
+        .trust-badge .number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #6366f1;
+        }
+
+        .trust-badge .label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #6366f1;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .tagline { font-size: 1.2rem; }
+            .stats { flex-direction: column; gap: 1.5rem; }
+            .pricing-card.featured { transform: none; }
+            .pricing-card.featured:hover { transform: translateY(-4px); }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="hero-content">
+            <div class="logo">🎯</div>
+            <h1>SubHunt</h1>
+            <p class="tagline">Stop wasting money on forgotten subscriptions.<br>Track every recurring payment in one place.</p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">$273</div>
+                    <div class="stat-label">Avg. Monthly Spend</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">12+</div>
+                    <div class="stat-label">Subscriptions Per User</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">2.5x</div>
+                    <div class="stat-label">Underestimated By</div>
+                </div>
+            </div>
+
+            <div class="cta-group">
+                <a href="#download" class="btn btn-primary">Download Free</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2>Everything You Need</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Smart Dashboard</h3>
+                <p>See your total monthly spending, upcoming bills, and subscription health at a glance. Animated counters and visual breakdowns make it easy to understand.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔔</div>
+                <h3>Bill Reminders</h3>
+                <p>Never miss a payment again. Get notified before each subscription renews so you can decide if it's still worth keeping.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Spending Insights</h3>
+                <p>Discover which categories eat your budget. Find savings opportunities and track your spending trends over time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Health Score</h3>
+                <p>Get a letter grade (A-F) for your subscription health. Five factors analyze your spending habits and suggest improvements.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📤</div>
+                <h3>Export Data</h3>
+                <p>Export your subscriptions as CSV or JSON. Import from other apps or share with your accountant. Your data, your control.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy First</h3>
+                <p>All data stays on your device. No bank linking, no cloud sync, no accounts. Your financial data never leaves your phone.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <h2>Simple Pricing</h2>
+        <p class="subtitle">Start free. Upgrade when you need more.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Free</h3>
+                <div class="price">$0</div>
+                <ul>
+                    <li>Track up to 3 subscriptions</li>
+                    <li>Basic dashboard</li>
+                    <li>Bill reminders</li>
+                    <li>CSV export</li>
+                </ul>
+            </div>
+            <div class="pricing-card featured">
+                <div class="badge">Most Popular</div>
+                <h3>Pro Yearly</h3>
+                <div class="price">$29.99<span>/year</span></div>
+                <ul>
+                    <li>Unlimited subscriptions</li>
+                    <li>Spending insights & analytics</li>
+                    <li>Health score tracking</li>
+                    <li>JSON export</li>
+                    <li>Premium sounds</li>
+                    <li>7-day free trial</li>
+                </ul>
+            </div>
+            <div class="pricing-card">
+                <h3>Lifetime</h3>
+                <div class="price">$79.99</div>
+                <ul>
+                    <li>Everything in Pro</li>
+                    <li>One-time purchase</li>
+                    <li>Forever yours</li>
+                    <li>Future updates included</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="social-proof" id="download">
+        <h2>Ready to Take Control?</h2>
+        <div class="trust-badges">
+            <div class="trust-badge">
+                <div class="number">100%</div>
+                <div class="label">Free to Start</div>
+            </div>
+            <div class="trust-badge">
+                <div class="number">0</div>
+                <div class="label">Bank Linking</div>
+            </div>
+            <div class="trust-badge">
+                <div class="number">100%</div>
+                <div class="label">Privacy First</div>
+            </div>
+        </div>
+        <br><br>
+        <a href="https://github.com/manideepdaram/SubHunt/releases/latest" class="btn btn-primary" style="font-size: 1.3rem; padding: 1.2rem 3rem;">
+            ⬇️ Download SubHunt (Free)
+        </a>
+        <p style="margin-top: 1.5rem; color: #64748b;">
+            Requires Android 8.0 (API 26) or higher
+        </p>
+    </section>
+
+    <footer class="footer">
+        <p>
+            © 2026 <a href="https://github.com/manideepdaram">Manideep Daram</a>. All rights reserved.<br>
+            <a href="privacy.html">Privacy Policy</a> · 
+            <a href="terms.html">Terms of Service</a> · 
+            <a href="https://github.com/manideepdaram/SubHunt">GitHub</a>
+        </p>
+    </footer>
+</body>
+</html>
