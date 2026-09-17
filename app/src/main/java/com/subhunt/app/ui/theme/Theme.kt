@@ -7,39 +7,47 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFBB86FC),
+// Anime Dark Theme — the only theme (anime apps are always dark)
+private val AnimeDarkScheme = darkColorScheme(
+    primary = AnimeNeonPurple,
     onPrimary = Color(0xFF000000),
     primaryContainer = Color(0xFF3700B3),
     onPrimaryContainer = Color(0xFFEADDFF),
-    secondary = Color(0xFF03DAC6),
+    secondary = AnimeNeonPink,
     onSecondary = Color(0xFF000000),
-    secondaryContainer = Color(0xFF005048),
-    onSecondaryContainer = Color(0xFF70F5E5),
-    background = Color(0xFF121212),
-    onBackground = Color(0xFFE6E1E5),
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color(0xFFE6E1E5),
-    surfaceVariant = Color(0xFF2C2C2C),
-    onSurfaceVariant = Color(0xFFCAC4D0),
-    error = Color(0xFFCF6679),
-    onError = Color(0xFF000000)
+    secondaryContainer = Color(0xFF3D0030),
+    onSecondaryContainer = Color(0xFFFFD9EC),
+    tertiary = AnimeNeonBlue,
+    onTertiary = Color(0xFF000000),
+    tertiaryContainer = Color(0xFF003D4D),
+    onTertiaryContainer = Color(0xFFB8EAFF),
+    background = AnimeVoid,
+    onBackground = AnimeTextPrimary,
+    surface = AnimeSurface,
+    onSurface = AnimeTextPrimary,
+    surfaceVariant = AnimeSurfaceLight,
+    onSurfaceVariant = AnimeTextSecondary,
+    error = AnimeNeonRed,
+    onError = Color(0xFFFFFFFF),
+    outline = AnimeTextMuted,
+    outlineVariant = Color(0xFF303050)
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF6750A4),
+// Anime Light Theme (rarely used but included for completeness)
+private val AnimeLightScheme = lightColorScheme(
+    primary = Color(0xFF6C3CE1),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFEADDFF),
     onPrimaryContainer = Color(0xFF21005E),
-    secondary = Color(0xFF625B71),
+    secondary = Color(0xFFD4447A),
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFE8DEF8),
-    onSecondaryContainer = Color(0xFF1E192B),
-    background = Color(0xFFFFFBFE),
-    onBackground = Color(0xFF1C1B1F),
-    surface = Color(0xFFFFFBFE),
-    onSurface = Color(0xFF1C1B1F),
-    surfaceVariant = Color(0xFFE7E0EC),
+    secondaryContainer = Color(0xFFFFD9EC),
+    onSecondaryContainer = Color(0xFF3D0030),
+    background = Color(0xFFF8F7FF),
+    onBackground = Color(0xFF1A1A2E),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF1A1A2E),
+    surfaceVariant = Color(0xFFF0EEFF),
     onSurfaceVariant = Color(0xFF49454F),
     error = Color(0xFFB3261E),
     onError = Color(0xFFFFFFFF)
@@ -48,7 +56,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun SubHuntTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled — we use our custom anime palette
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -56,13 +64,13 @@ fun SubHuntTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> AnimeDarkScheme
+        else -> AnimeLightScheme
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography(),
+        typography = AnimeTypography,
         content = content
     )
 }

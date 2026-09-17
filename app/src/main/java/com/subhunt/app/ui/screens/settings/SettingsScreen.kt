@@ -23,7 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.revenuecat.purchases.kmp.ui.revenuecatui.CustomerCenter
+import android.content.Intent
+import android.net.Uri
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,16 +50,7 @@ fun SettingsScreen(
     var showPinVerifyDialog by remember { mutableStateOf(false) }
     var showNotificationRationale by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    var isCustomerCenterVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-
-    if (isCustomerCenterVisible) {
-        CustomerCenter(
-            modifier = Modifier.fillMaxSize(),
-            onDismiss = { isCustomerCenterVisible = false }
-        )
-        return
-    }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -316,8 +308,14 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Rounded.Person,
                 title = "Manage Subscription",
-                subtitle = "View, cancel, or restore your subscription",
-                onClick = { isCustomerCenterVisible = true }
+                subtitle = "View your plan or contact support",
+                onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:support@subhunt.app")
+                        putExtra(Intent.EXTRA_SUBJECT, "SubHunt Pro - Subscription Support")
+                    }
+                    context.startActivity(Intent.createChooser(intent, "Send Email"))
+                }
             )
         }
     }

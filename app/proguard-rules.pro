@@ -10,8 +10,7 @@
 -keep class javax.inject.** { *; }
 -keep class * extends dagger.hilt.android.lifecycle.HiltViewModel
 
-# RevenueCat KMP
--keep class com.revenuecat.purchases.** { *; }
+# Billing (activation code system)
 -keep class com.subhunt.app.billing.** { *; }
 -keepattributes *Annotation*
 

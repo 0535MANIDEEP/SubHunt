@@ -16,7 +16,6 @@ coil = "2.7.0"
 junit = "4.13.2"
 junitExt = "1.2.1"
 espressoCore = "3.6.1"
-revenuecat-kmp = "3.8.0"
 workRuntime = "2.10.0"
 hiltWork = "1.2.0"
 glance = "1.1.1"
@@ -51,9 +50,6 @@ hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWo
 hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
 
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-
-revenuecat-kmp-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "revenuecat-kmp" }
-revenuecat-kmp-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "revenuecat-kmp" }
 
 work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntime" }
 

@@ -3,6 +3,7 @@ package com.subhunt.app.ui.screens.paywall
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -29,22 +31,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.subhunt.app.ui.theme.*
 
-private val premiumGradient = Brush.verticalGradient(
+enum class Plan { MONTHLY, YEARLY, LIFETIME }
+
+enum class PaywallStep { PLAN_SELECT, CONFIRM, ACTIVATE_CODE }
+
+// Anime-style gradient backgrounds
+private val animeBgGradient = Brush.verticalGradient(
     colors = listOf(
-        Color(0xFF1A1A2E),
-        Color(0xFF16213E),
-        Color(0xFF0F3460)
+        Color(0xFF0A0A14),
+        Color(0xFF12121E),
+        Color(0xFF1A0A2E),
+        Color(0xFF0A0A14)
     )
 )
 
-private val goldGradient = Brush.horizontalGradient(
-    colors = listOf(Color(0xFFFFD700), Color(0xFFFFA500))
+private val animeGlowGradient = Brush.radialGradient(
+    colors = listOf(
+        AnimeNeonPurple.copy(alpha = 0.3f),
+        AnimeNeonPink.copy(alpha = 0.1f),
+        Color.Transparent
+    )
 )
 
-// RevenueCat web billing URL — replace with your actual RevenueCat web link
-// Create at: RevenueCat → Project Settings → Paywalls → Web Paywall
-private const val WEB_PAYWALL_URL = "https://purchase.revenuecat.com/YOUR_WEB_PAYWALL_ID"
+private val animeGoldGlow = Brush.radialGradient(
+    colors = listOf(
+        AnimePaywallHighlight.copy(alpha = 0.2f),
+        Color.Transparent
+    )
+)
+
+private val animePremiumGradient = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFF6C3CE1),
+        Color(0xFFFF6B9D),
+        Color(0xFFFFD700)
+    )
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,282 +78,650 @@ fun CustomPaywallScreen(
 ) {
     val context = LocalContext.current
     val isSubscribed by viewModel.isSubscribed.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     var selectedPlan by remember { mutableStateOf(Plan.YEARLY) }
+    var currentStep by remember { mutableStateOf(PaywallStep.PLAN_SELECT) }
+    var activationCode by remember { mutableStateOf("") }
+    var activationEmail by remember { mutableStateOf("") }
+    var isActivating by remember { mutableStateOf(false) }
 
     LaunchedEffect(isSubscribed) {
         if (isSubscribed) onNavigateBack()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        },
-        containerColor = Color.Transparent
-    ) { padding ->
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.clearError()
+            isActivating = false
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Anime background
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(premiumGradient)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(20.dp))
+                .background(animeBgGradient)
+        )
 
-                // Premium badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(goldGradient)
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        "SUBHUNT PRO",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A2E)
-                    )
-                }
+        // Glow effect at top
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+                .background(animeGlowGradient)
+        )
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    "Unlock Your\nSubscription Power",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 36.sp
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    "Join 10,000+ users who save hundreds\non subscriptions every year",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Benefits list
-                val benefits = listOf(
-                    IconPair(Icons.Rounded.AllInclusive, "Unlimited Subscriptions", "Track every subscription, no limits"),
-                    IconPair(Icons.Rounded.Insights, "Smart Insights", "Health score, spending analytics, trends"),
-                    IconPair(Icons.Rounded.FileDownload, "Export Data", "CSV & JSON backups of your data"),
-                    IconPair(Icons.Rounded.MusicNote, "Premium Sounds", "Exclusive reminder tones + per-subscription sounds"),
-                    IconPair(Icons.Rounded.Notifications, "Bill Reminders", "Never miss a payment with smart alerts"),
-                    IconPair(Icons.Rounded.TrendingUp, "Savings Tracker", "See how much you save over time")
-                )
-
-                benefits.forEach { benefit ->
-                    BenefitRow(benefit)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Social proof
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(5) {
-                        Icon(
-                            Icons.Rounded.Star,
-                            contentDescription = null,
-                            tint = Color(0xFFFFD700),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "4.8 rating · 2,500+ reviews",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.6f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Plan selector
-                PlanSelector(selectedPlan) { selectedPlan = it }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // CTA Button — opens web payment (no Play Store needed)
-                Button(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(WEB_PAYWALL_URL))
-                        context.startActivity(intent)
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {},
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            when (currentStep) {
+                                PaywallStep.CONFIRM -> currentStep = PaywallStep.PLAN_SELECT
+                                PaywallStep.ACTIVATE_CODE -> currentStep = PaywallStep.CONFIRM
+                                PaywallStep.PLAN_SELECT -> onNavigateBack()
+                            }
+                        }) {
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = AnimeTextPrimary)
+                        }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFD700),
-                        contentColor = Color(0xFF1A1A2E)
-                    )
-                ) {
-                    Text(
-                        when (selectedPlan) {
-                            Plan.MONTHLY -> "Subscribe $4.99/mo"
-                            Plan.YEARLY -> "Subscribe $29.99/yr"
-                            Plan.LIFETIME -> "Get Lifetime $79.99"
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    "Cancel anytime · No questions asked",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.5f)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Savings callout
-                if (selectedPlan == Plan.YEARLY) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF4CAF50).copy(alpha = 0.15f))
-                            .padding(12.dp)
-                    ) {
-                        Text(
-                            "Save $29.89/year compared to monthly billing",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF81C784)
-                        )
+            },
+            containerColor = Color.Transparent
+        ) { padding ->
+            when (currentStep) {
+                PaywallStep.PLAN_SELECT -> AnimePlanSelection(
+                    padding = padding,
+                    selectedPlan = selectedPlan,
+                    onPlanSelected = { selectedPlan = it },
+                    onContinue = { currentStep = PaywallStep.CONFIRM }
+                )
+                PaywallStep.CONFIRM -> AnimeConfirmPayment(
+                    padding = padding,
+                    selectedPlan = selectedPlan,
+                    onPay = { currentStep = PaywallStep.ACTIVATE_CODE },
+                    context = context
+                )
+                PaywallStep.ACTIVATE_CODE -> AnimeActivationCode(
+                    padding = padding,
+                    code = activationCode,
+                    email = activationEmail,
+                    onCodeChange = { activationCode = it },
+                    onEmailChange = { activationEmail = it },
+                    isActivating = isActivating,
+                    onActivate = {
+                        isActivating = true
+                        viewModel.activate(activationCode, activationEmail)
                     }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Legal
-                Text(
-                    "By subscribing, you agree to our Terms of Service and Privacy Policy. Subscription automatically renews unless cancelled at least 24 hours before the end of the current period.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.3f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 32.dp)
                 )
             }
         }
     }
 }
 
-private data class IconPair(
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val title: String,
-    val description: String
-)
+// ============================================================
+// TODO: Replace with YOUR Stripe Payment Links
+// Create free account at: https://dashboard.stripe.com
+// Then: Payment Links → Create payment link
+// ============================================================
+private const val STRIPE_MONTHLY_URL = "https://buy.stripe.com/YOUR_MONTHLY_LINK"
+private const val STRIPE_YEARLY_URL = "https://buy.stripe.com/YOUR_YEARLY_LINK"
+private const val STRIPE_LIFETIME_URL = "https://buy.stripe.com/YOUR_LIFETIME_LINK"
+
+private fun getStripeUrl(plan: Plan): String = when (plan) {
+    Plan.MONTHLY -> STRIPE_MONTHLY_URL
+    Plan.YEARLY -> STRIPE_YEARLY_URL
+    Plan.LIFETIME -> STRIPE_LIFETIME_URL
+}
+
+private fun getAmount(plan: Plan): String = when (plan) {
+    Plan.MONTHLY -> "₹419"
+    Plan.YEARLY -> "₹2,499"
+    Plan.LIFETIME -> "₹6,649"
+}
+
+private fun getPlanName(plan: Plan): String = when (plan) {
+    Plan.MONTHLY -> "Monthly"
+    Plan.YEARLY -> "Yearly"
+    Plan.LIFETIME -> "Lifetime"
+}
+
+private fun getMonthlyEquiv(plan: Plan): String = when (plan) {
+    Plan.MONTHLY -> "₹419/month"
+    Plan.YEARLY -> "Just ₹208/month"
+    Plan.LIFETIME -> "One-time forever"
+}
 
 @Composable
-private fun BenefitRow(benefit: IconPair) {
+private fun AnimePlanSelection(
+    padding: PaddingValues,
+    selectedPlan: Plan,
+    onPlanSelected: (Plan) -> Unit,
+    onContinue: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Anime badge
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(animePremiumGradient)
+                .padding(horizontal = 20.dp, vertical = 8.dp)
+        ) {
+            Text(
+                "★ SUBHUNT PRO ★",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                letterSpacing = 2.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Main title — dramatic anime style
+        Text(
+            "Unlock Your\nFull Power",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Black,
+            color = AnimeTextPrimary,
+            textAlign = TextAlign.Center,
+            lineHeight = 40.sp
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Glowing subtitle
+        Text(
+          "Master your subscriptions\nlike an anime protagonist",
+            style = MaterialTheme.typography.bodyLarge,
+            color = AnimeNeonPurple,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Benefits — anime style cards
+        val benefits = listOf(
+            Triple(Icons.Rounded.AllInclusive, "Unlimited Subs", "No limits — track everything"),
+            Triple(Icons.Rounded.Insights, "Power Analytics", "Health scores & trends"),
+            Triple(Icons.Rounded.FileDownload, "Data Export", "CSV & JSON backups"),
+            Triple(Icons.Rounded.MusicNote, "Battle Sounds", "Premium reminder tones"),
+            Triple(Icons.Rounded.TrendingUp, "Savings Mode", "Watch your savings grow")
+        )
+
+        benefits.forEach { (icon, title, desc) ->
+            AnimeBenefitCard(icon, title, desc)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Plan selector
+        PlanSelector(selectedPlan) { onPlanSelected(it) }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // CTA Button with glow
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(16.dp, RoundedCornerShape(16.dp), ambientColor = AnimeNeonPurple.copy(alpha = 0.5f))
+        ) {
+            Button(
+                onClick = onContinue,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AnimePaywallHighlight,
+                    contentColor = Color(0xFF0A0A14)
+                )
+            ) {
+                Text(
+                    "POWER UP →",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            "Cancel anytime · No commitment",
+            style = MaterialTheme.typography.bodySmall,
+            color = AnimeTextMuted,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+    }
+}
+
+@Composable
+private fun AnimeBenefitCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    description: String
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(AnimeSurfaceLight.copy(alpha = 0.5f))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF4CAF50).copy(alpha = 0.15f)),
+                .clip(RoundedCornerShape(10.dp))
+                .background(AnimeNeonPurple.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                benefit.icon,
-                contentDescription = null,
-                tint = Color(0xFF81C784),
-                modifier = Modifier.size(20.dp)
-            )
+            Icon(icon, contentDescription = null, tint = AnimeNeonPurple, modifier = Modifier.size(22.dp))
         }
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Column {
-            Text(
-                benefit.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
-            Text(
-                benefit.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.6f)
-            )
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = AnimeTextPrimary)
+            Text(description, style = MaterialTheme.typography.bodySmall, color = AnimeTextSecondary)
         }
     }
 }
 
-enum class Plan { MONTHLY, YEARLY, LIFETIME }
+@Composable
+private fun AnimeConfirmPayment(
+    padding: PaddingValues,
+    selectedPlan: Plan,
+    onPay: () -> Unit,
+    context: Context
+) {
+    val amount = getAmount(selectedPlan)
+    val planName = getPlanName(selectedPlan)
+    val monthly = getMonthlyEquiv(selectedPlan)
+    val url = getStripeUrl(selectedPlan)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Glowing icon
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .shadow(24.dp, CircleShape, ambientColor = AnimeNeonPurple.copy(alpha = 0.6f))
+                .clip(CircleShape)
+                .background(AnimePaywallCard)
+                .border(2.dp, AnimeNeonPurple, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Rounded.Bolt, contentDescription = null, tint = AnimePaywallHighlight, modifier = Modifier.size(40.dp))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            "Final Form",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Black,
+            color = AnimeTextPrimary
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            "Choose your power level",
+            style = MaterialTheme.typography.bodyLarge,
+            color = AnimeTextSecondary
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Plan summary
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(AnimePaywallCard)
+                .border(1.dp, AnimeNeonPurple.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                .padding(24.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Plan", style = MaterialTheme.typography.bodyMedium, color = AnimeTextSecondary)
+                    Text(
+                        planName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = AnimeNeonPurple
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(color = AnimeTextMuted.copy(alpha = 0.2f))
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text("Total", style = MaterialTheme.typography.bodyMedium, color = AnimeTextSecondary)
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            amount,
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Black,
+                            color = AnimePaywallHighlight
+                        )
+                        Text(monthly, style = MaterialTheme.typography.bodySmall, color = AnimeTextMuted)
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // What's included
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(AnimeNeonGreen.copy(alpha = 0.08f))
+                .border(1.dp, AnimeNeonGreen.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Column {
+                Text(
+                    "⚡ UNLOCKED FEATURES",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AnimeNeonGreen,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                listOf(
+                    "Unlimited subscriptions",
+                    "Smart insights & analytics",
+                    "CSV & JSON data export",
+                    "Premium battle sounds",
+                    "Savings tracker"
+                ).forEach { item ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("✦", color = AnimeNeonGreen, style = MaterialTheme.typography.bodySmall)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(item, style = MaterialTheme.typography.bodySmall, color = AnimeTextPrimary)
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Pay button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(20.dp, RoundedCornerShape(16.dp), ambientColor = AnimePaywallHighlight.copy(alpha = 0.4f))
+        ) {
+            Button(
+                onClick = {
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        onPay()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Payment not configured. Contact support@subhunt.app", Toast.LENGTH_LONG).show()
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AnimePaywallHighlight,
+                    contentColor = Color(0xFF0A0A14)
+                )
+            ) {
+                Text(
+                    "PAY $amount →",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.Shield, contentDescription = null, tint = AnimeTextMuted, modifier = Modifier.size(14.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                "Secured by Stripe · 256-bit encryption",
+                style = MaterialTheme.typography.bodySmall,
+                color = AnimeTextMuted
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            "Check email for activation code after payment",
+            style = MaterialTheme.typography.bodySmall,
+            color = AnimeTextMuted,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+    }
+}
+
+@Composable
+private fun AnimeActivationCode(
+    padding: PaddingValues,
+    code: String,
+    email: String,
+    onCodeChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    isActivating: Boolean,
+    onActivate: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .shadow(24.dp, CircleShape, ambientColor = AnimeNeonGreen.copy(alpha = 0.6f))
+                .clip(CircleShape)
+                .background(AnimePaywallCard)
+                .border(2.dp, AnimeNeonGreen, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = AnimeNeonGreen, modifier = Modifier.size(40.dp))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            "Payment Complete!",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Black,
+            color = AnimeTextPrimary
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            "Enter your activation code to unlock power",
+            style = MaterialTheme.typography.bodyLarge,
+            color = AnimeTextSecondary
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = onEmailChange,
+            label = { Text("Email used for payment", color = AnimeTextSecondary) },
+            placeholder = { Text("you@example.com", color = AnimeTextMuted) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = AnimeNeonPurple,
+                unfocusedBorderColor = AnimeTextMuted.copy(alpha = 0.3f),
+                focusedTextColor = AnimeTextPrimary,
+                unfocusedTextColor = AnimeTextPrimary,
+                cursorColor = AnimeNeonPurple
+            ),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = code,
+            onValueChange = { onCodeChange(it.uppercase().take(12)) },
+            label = { Text("Activation Code", color = AnimeTextSecondary) },
+            placeholder = { Text("XXXXXXXXXXXX", color = AnimeTextMuted) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = AnimePaywallHighlight,
+                unfocusedBorderColor = AnimeTextMuted.copy(alpha = 0.3f),
+                focusedTextColor = AnimeTextPrimary,
+                unfocusedTextColor = AnimeTextPrimary,
+                cursorColor = AnimePaywallHighlight
+            ),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            "M = Monthly · Y = Yearly · L = Lifetime",
+            style = MaterialTheme.typography.bodySmall,
+            color = AnimeTextMuted
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(16.dp, RoundedCornerShape(16.dp), ambientColor = AnimeNeonGreen.copy(alpha = 0.4f))
+        ) {
+            Button(
+                onClick = onActivate,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AnimeNeonGreen,
+                    contentColor = Color(0xFF0A0A14)
+                ),
+                enabled = code.length == 12 && email.contains("@") && !isActivating
+            ) {
+                if (isActivating) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color(0xFF0A0A14),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        "ACTIVATE →",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            "One-time use · Tied to your email",
+            style = MaterialTheme.typography.bodySmall,
+            color = AnimeTextMuted,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+    }
+}
 
 @Composable
 private fun PlanSelector(selected: Plan, onSelect: (Plan) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // Yearly (recommended)
-        PlanCard(
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        AnimePlanCard(
             title = "Yearly",
-            price = "$2.49",
-            period = "/month",
-            subtitle = "Billed annually at $29.99",
-            badge = "SAVE 50%",
-            isSelected = selected == Plan.YEARLY,
-            onClick = { onSelect(Plan.YEARLY) }
-        )
+            price = "₹2,499",
+            period = "/year",
+            subtitle = "Just ₹208/month · Save 40%",
+            badge = "BEST VALUE",
+            badgeColor = AnimePaywallHighlight,
+            isSelected = selected == Plan.YEARLY
+        ) { onSelect(Plan.YEARLY) }
 
-        // Monthly
-        PlanCard(
+        AnimePlanCard(
             title = "Monthly",
-            price = "$4.99",
+            price = "₹419",
             period = "/month",
             subtitle = "Billed monthly",
             badge = null,
-            isSelected = selected == Plan.MONTHLY,
-            onClick = { onSelect(Plan.MONTHLY) }
-        )
+            badgeColor = Color.Transparent,
+            isSelected = selected == Plan.MONTHLY
+        ) { onSelect(Plan.MONTHLY) }
 
-        // Lifetime
-        PlanCard(
+        AnimePlanCard(
             title = "Lifetime",
-            price = "$79.99",
+            price = "₹6,649",
             period = "",
-            subtitle = "One-time purchase · Forever yours",
-            badge = "BEST VALUE",
-            isSelected = selected == Plan.LIFETIME,
-            onClick = { onSelect(Plan.LIFETIME) }
-        )
+            subtitle = "One-time · Forever yours",
+            badge = "BEST DEAL",
+            badgeColor = AnimeNeonGreen,
+            isSelected = selected == Plan.LIFETIME
+        ) { onSelect(Plan.LIFETIME) }
     }
 }
 
 @Composable
-private fun PlanCard(
+private fun AnimePlanCard(
     title: String,
     price: String,
     period: String,
     subtitle: String,
     badge: String?,
+    badgeColor: Color,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -338,18 +730,17 @@ private fun PlanCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .then(
-                if (isSelected) {
-                    Modifier.border(2.dp, Color(0xFFFFD700), RoundedCornerShape(16.dp))
-                } else {
-                    Modifier.border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                }
+                if (isSelected) Modifier
+                    .border(2.dp, AnimePaywallHighlight, RoundedCornerShape(16.dp))
+                    .shadow(8.dp, RoundedCornerShape(16.dp), ambientColor = AnimePaywallHighlight.copy(alpha = 0.3f))
+                else Modifier.border(1.dp, AnimeTextMuted.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
             )
             .background(
-                if (isSelected) Color(0xFFFFD700).copy(alpha = 0.1f)
-                else Color.White.copy(alpha = 0.05f)
+                if (isSelected) AnimePaywallHighlight.copy(alpha = 0.08f)
+                else AnimePaywallCard
             )
             .clickable(onClick = onClick)
-            .padding(16.dp)
+            .padding(18.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -361,47 +752,42 @@ private fun PlanCard(
                         title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = AnimeTextPrimary
                     )
                     if (badge != null) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(
-                                    if (badge == "BEST VALUE") Color(0xFFFFD700)
-                                    else Color(0xFF4CAF50)
-                                )
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(badgeColor)
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
                         ) {
                             Text(
                                 badge,
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (badge == "BEST VALUE") Color(0xFF1A1A2E) else Color.White
+                                fontWeight = FontWeight.Black,
+                                color = if (badgeColor == AnimePaywallHighlight) Color(0xFF0A0A14) else Color.White,
+                                letterSpacing = 0.5.sp
                             )
                         }
                     }
                 }
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.6f)
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = AnimeTextSecondary)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         price,
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        fontWeight = FontWeight.Black,
+                        color = if (isSelected) AnimePaywallHighlight else AnimeTextPrimary
                     )
                     if (period.isNotEmpty()) {
                         Text(
                             period,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.5f),
+                            color = AnimeTextMuted,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                     }

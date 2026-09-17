@@ -25,10 +25,10 @@ import com.subhunt.app.ui.screens.legal.TermsOfServiceScreen
 import com.subhunt.app.ui.screens.lock.LockMode
 import com.subhunt.app.ui.screens.lock.LockScreen
 import com.subhunt.app.ui.screens.lock.LockViewModel
-import com.subhunt.app.ui.screens.paywall.PaywallScreen
 import com.subhunt.app.ui.screens.settings.SettingsScreen
 import com.subhunt.app.ui.screens.sounds.SoundPickerScreen
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 object Routes {
     const val ONBOARDING = "onboarding"

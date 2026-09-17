@@ -20,8 +20,6 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "REVENUECAT_API_KEY", "\"test_boDTvjKkOByZyLbeewlaWXVscqH\"")
     }
 
     signingConfigs {
@@ -100,8 +98,6 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.navigation.compose)
 
-    implementation(libs.revenuecat.kmp.core)
-    implementation(libs.revenuecat.kmp.ui)
     implementation(libs.work.runtime)
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)

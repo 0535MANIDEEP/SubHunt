@@ -1,17 +1,11 @@
 package com.subhunt.app.billing
 
 // Copyright (c) 2026 Manideep Daram. All rights reserved.
+// Zero-fee activation code system — no RevenueCat, no payment processor fees.
+// User pays via UPI/bank transfer → you verify → send activation code → user enters it here.
 
 import android.content.Context
 import android.util.Log
-import com.revenuecat.purchases.kmp.LogLevel
-import com.revenuecat.purchases.kmp.Purchases
-import com.revenuecat.purchases.kmp.UpdatedCustomerInfoDelegate
-import com.revenuecat.purchases.kmp.configure
-import com.revenuecat.purchases.kmp.models.CustomerInfo
-import com.revenuecat.purchases.kmp.models.EntitlementInfo
-import com.revenuecat.purchases.kmp.models.Offerings
-import com.revenuecat.purchases.kmp.models.Package
 import com.subhunt.app.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,122 +20,67 @@ class BillingManager @Inject constructor(
     private val TAG = "BillingManager"
 
     companion object {
-        const val ENTITLEMENT_ID = "subhunt_pro"
+        private const val PREFS_NAME = "subhunt_activation"
+        private const val KEY_ACTIVATED = "activated"
+        private const val KEY_ACTIVATED_EMAIL = "activated_email"
+        private const val KEY_ACTIVATED_PLAN = "activated_plan"
+        private const val KEY_ACTIVATED_DATE = "activated_date"
+        private const val KEY_ACTIVATED_EXPIRES = "activated_expires"
     }
+
+    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private val _isSubscribed = MutableStateFlow(false)
     val isSubscribed: StateFlow<Boolean> = _isSubscribed
 
-    private val _customerInfo = MutableStateFlow<CustomerInfo?>(null)
-    val customerInfo: StateFlow<CustomerInfo?> = _customerInfo
+    private val _activationEmail = MutableStateFlow<String?>(null)
+    val activationEmail: StateFlow<String?> = _activationEmail
 
-    private val _offerings = MutableStateFlow<Offerings?>(null)
-    val offerings: StateFlow<Offerings?> = _offerings
+    private val _activationPlan = MutableStateFlow<String?>(null)
+    val activationPlan: StateFlow<String?> = _activationPlan
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    fun configure(apiKey: String) {
-        try {
-            Purchases.logLevel = if (BuildConfig.DEBUG) LogLevel.DEBUG else LogLevel.ERROR
-            Purchases.configure(apiKey = apiKey) {
-                appUserId = null
-            }
-            setupCustomerInfoListener()
-            fetchCustomerInfo()
-            fetchOfferings()
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to configure RevenueCat", e)
-            _errorMessage.value = "Failed to initialize: ${e.message}"
-        }
+    init {
+        restoreActivation()
     }
 
-    private fun setupCustomerInfoListener() {
-        Purchases.sharedInstance.delegate = UpdatedCustomerInfoDelegate { customerInfo ->
-            _customerInfo.value = customerInfo
-            _isSubscribed.value = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-        }
-    }
+    fun activateWithCode(code: String, email: String): Boolean {
+        val cleanCode = code.trim().uppercase()
+        val cleanEmail = email.trim().lowercase()
 
-    fun fetchCustomerInfo() {
-        try {
-            Purchases.sharedInstance.getCustomerInfo(
-                onError = { error ->
-                    if (BuildConfig.DEBUG) Log.w(TAG, "Failed to fetch customer info: ${error.message}")
-                    _errorMessage.value = "Failed to check subscription: ${error.message}"
-                },
-                onSuccess = { customerInfo ->
-                    _customerInfo.value = customerInfo
-                    _isSubscribed.value = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                }
-            )
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to fetch customer info", e)
-        }
-    }
-
-    private fun fetchOfferings() {
-        try {
-            Purchases.sharedInstance.getOfferings(
-                onError = { error ->
-                    if (BuildConfig.DEBUG) Log.w(TAG, "Failed to fetch offerings: ${error.message}")
-                    _errorMessage.value = "Failed to load offers: ${error.message}"
-                },
-                onSuccess = { offerings ->
-                    _offerings.value = offerings
-                }
-            )
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to fetch offerings", e)
-        }
-    }
-
-    fun purchase(packageToPurchase: Package?) {
-        val pkg = packageToPurchase ?: offerings.value?.current?.availablePackages?.firstOrNull()
-        if (pkg == null) {
-            _errorMessage.value = "No packages available for purchase"
-            return
+        if (cleanEmail.isEmpty() || !cleanEmail.contains("@")) {
+            _errorMessage.value = "Please enter a valid email address."
+            return false
         }
 
-        try {
-            Purchases.sharedInstance.purchase(
-                packageToPurchase = pkg,
-                onError = { error, userCancelled ->
-                    if (!userCancelled) {
-                        if (BuildConfig.DEBUG) Log.w(TAG, "Purchase failed: ${error.message}")
-                        _errorMessage.value = "Purchase failed: ${error.message}"
-                    }
-                },
-                onSuccess = { transaction, customerInfo ->
-                    _customerInfo.value = customerInfo
-                    _isSubscribed.value = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                }
-            )
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e(TAG, "Purchase error", e)
-            _errorMessage.value = "Purchase error: ${e.message}"
+        if (cleanCode.length != 12) {
+            _errorMessage.value = "Invalid activation code format."
+            return false
         }
-    }
 
-    fun buyPro(packageToPurchase: Package?) {
-        purchase(packageToPurchase)
-    }
-
-    fun restorePurchases() {
-        try {
-            Purchases.sharedInstance.restorePurchases(
-                onError = { error ->
-                    if (BuildConfig.DEBUG) Log.w(TAG, "Failed to restore purchases: ${error.message}")
-                    _errorMessage.value = "Failed to restore: ${error.message}"
-                },
-                onSuccess = { customerInfo ->
-                    _customerInfo.value = customerInfo
-                    _isSubscribed.value = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                }
-            )
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to restore purchases", e)
+        if (!ActivationCodeGenerator.verify(cleanCode, cleanEmail)) {
+            _errorMessage.value = "Invalid activation code. Please check and try again."
+            return false
         }
+
+        val plan = ActivationCodeGenerator.getPlanFromCode(cleanCode)
+
+        prefs.edit().apply {
+            putBoolean(KEY_ACTIVATED, true)
+            putString(KEY_ACTIVATED_EMAIL, cleanEmail)
+            putString(KEY_ACTIVATED_PLAN, plan)
+            putLong(KEY_ACTIVATED_DATE, System.currentTimeMillis())
+            apply()
+        }
+
+        _isSubscribed.value = true
+        _activationEmail.value = cleanEmail
+        _activationPlan.value = plan
+
+        if (BuildConfig.DEBUG) Log.d(TAG, "Activated: $cleanEmail, plan: $plan")
+        return true
     }
 
     fun clearError() {
@@ -149,10 +88,26 @@ class BillingManager @Inject constructor(
     }
 
     fun hasProEntitlement(): Boolean {
-        return _customerInfo.value?.entitlements?.get(ENTITLEMENT_ID)?.isActive == true
+        return _isSubscribed.value
     }
 
-    fun getActiveEntitlements(): Map<String, EntitlementInfo> {
-        return _customerInfo.value?.entitlements?.active ?: emptyMap()
+    fun getActivationInfo(): String? {
+        val email = _activationEmail.value ?: return null
+        val plan = _activationPlan.value ?: return "Pro"
+        return "Activated for $email ($plan)"
+    }
+
+    fun isPlanActive(plan: String): Boolean {
+        return _isSubscribed.value && _activationPlan.value == plan
+    }
+
+    private fun restoreActivation() {
+        val activated = prefs.getBoolean(KEY_ACTIVATED, false)
+        if (activated) {
+            _isSubscribed.value = true
+            _activationEmail.value = prefs.getString(KEY_ACTIVATED_EMAIL, null)
+            _activationPlan.value = prefs.getString(KEY_ACTIVATED_PLAN, null)
+            if (BuildConfig.DEBUG) Log.d(TAG, "Restored activation: ${_activationEmail.value}")
+        }
     }
 }

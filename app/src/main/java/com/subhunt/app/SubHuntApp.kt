@@ -43,13 +43,18 @@ class SubHuntApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize notifications
         try {
             NotificationHelper.createChannels(this)
             BillingReminderWorker.schedule(this)
         } catch (e: Exception) {
             if (BuildConfig.DEBUG) Log.e("SubHuntApp", "Failed to init notifications", e)
         }
-        billingManager.configure(BuildConfig.REVENUECAT_API_KEY)
+
+        // BillingManager restores activation from SharedPreferences on init
+
+        // Auto-lock when app goes to background
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onStop(owner: LifecycleOwner) {

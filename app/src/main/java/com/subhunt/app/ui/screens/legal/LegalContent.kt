@@ -39,14 +39,10 @@ val PRIVACY_SECTIONS: List<LegalSection> = listOf(
     ),
     LegalSection(
         "3. Data shared with third parties",
-        "We share data with third parties only where the platform requires it:\n\n" +
-            "• RevenueCat (subscription infrastructure): when you purchase or " +
-            "restore SubHunt Pro, RevenueCat processes purchase tokens, " +
-            "entitlement status, and app/device identifiers to verify your " +
-            "subscription. See revenuecat.com/privacy.\n\n" +
-            "• Google Play Billing: payments are processed by Google under the " +
-            "Google Play Terms of Service and Privacy Policy. We never see or " +
-            "store your card or UPI credentials.\n\n" +
+        "We share data with third parties only where required:\n\n" +
+            "• Payment processing: when you purchase SubHunt Pro, payments are " +
+            "processed securely via UPI or bank transfer. We never see or store " +
+            "your payment credentials.\n\n" +
             "• Android system services: if device backup is enabled, Android may " +
             "keep an encrypted backup of app data under Google's backup " +
             "retention policy. Notifications you enable are delivered locally " +
@@ -65,8 +61,7 @@ val PRIVACY_SECTIONS: List<LegalSection> = listOf(
             "save an export file to Downloads. On Android 10+, scoped-storage " +
             "APIs are used and no storage permission is needed.\n\n" +
             "The app requests no location, contacts, camera, microphone, or " +
-            "network-state data beyond what the operating system needs to " +
-            "validate Play Billing purchases."
+            "network-state data beyond what the operating system needs."
     ),
     LegalSection(
         "5. Retention and deletion",
