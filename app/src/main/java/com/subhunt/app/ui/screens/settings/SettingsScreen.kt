@@ -134,17 +134,8 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Rounded.MusicNote,
                 title = "Reminder Sound",
-                subtitle = if (isSubscribed) com.subhunt.app.notification.ReminderSounds.byId(reminderSoundId).label else "Pro feature",
-                trailing = if (!isSubscribed) {
-                    { ProBadge() }
-                } else null,
-                onClick = {
-                    if (!isSubscribed) {
-                        onNavigateToPaywall()
-                    } else {
-                        onNavigateToSounds()
-                    }
-                }
+                subtitle = com.subhunt.app.notification.ReminderSounds.byId(reminderSoundId).label,
+                onClick = { onNavigateToSounds() }
             )
 
             SettingsItem(
@@ -214,17 +205,8 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Rounded.FileDownload,
                 title = "Export to CSV",
-                subtitle = if (isSubscribed) "Save spreadsheet to Downloads" else "Pro feature",
-                trailing = if (!isSubscribed) {
-                    { ProBadge() }
-                } else null,
+                subtitle = "Save spreadsheet to Downloads",
                 onClick = {
-                    if (!isSubscribed) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Upgrade to Pro to export your data")
-                        }
-                        return@SettingsItem
-                    }
                     viewModel.exportCsv(context) { result ->
                         handleExportResult(result, "text/csv")
                     }
@@ -234,17 +216,8 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Rounded.DataObject,
                 title = "Export to JSON",
-                subtitle = if (isSubscribed) "Save full backup to Downloads" else "Pro feature",
-                trailing = if (!isSubscribed) {
-                    { ProBadge() }
-                } else null,
+                subtitle = "Save full backup to Downloads",
                 onClick = {
-                    if (!isSubscribed) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Upgrade to Pro to export your data")
-                        }
-                        return@SettingsItem
-                    }
                     viewModel.exportJson(context) { result ->
                         handleExportResult(result, "application/json")
                     }
@@ -304,19 +277,6 @@ fun SettingsScreen(
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
-            SettingsItem(
-                icon = Icons.Rounded.Person,
-                title = "Manage Subscription",
-                subtitle = "View your plan or contact support",
-                onClick = {
-                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:support@subhunt.app")
-                        putExtra(Intent.EXTRA_SUBJECT, "SubHunt Pro - Subscription Support")
-                    }
-                    context.startActivity(Intent.createChooser(intent, "Send Email"))
-                }
-            )
         }
     }
 

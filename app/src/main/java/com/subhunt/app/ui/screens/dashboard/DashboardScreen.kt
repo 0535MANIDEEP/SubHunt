@@ -69,16 +69,8 @@ fun DashboardScreen(
                     Text("SubHunt", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
                 },
                 actions = {
-                    IconButton(onClick = {
-                        if (isSubscribed) onInsightsClick()
-                        else onPaywallClick()
-                    }) {
+                    IconButton(onClick = { onInsightsClick() }) {
                         Icon(Icons.Rounded.Insights, contentDescription = "Insights")
-                    }
-                    if (!isSubscribed) {
-                        IconButton(onClick = onPaywallClick) {
-                            Icon(Icons.Rounded.Star, contentDescription = "Upgrade", tint = MaterialTheme.colorScheme.primary)
-                        }
                     }
                     IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Rounded.Settings, contentDescription = "Settings")
@@ -181,14 +173,6 @@ fun DashboardScreen(
                 )
             }
 
-            if (subscriptions.isNotEmpty() && !isSubscribed) {
-                item {
-                    ProBanner(
-                        subscriptionCount = subscriptions.size,
-                        onUpgradeClick = onPaywallClick
-                    )
-                }
-            }
             } // end else (!isLoading)
         }
     }
@@ -224,22 +208,6 @@ fun DashboardScreen(
         )
     }
 
-    if (showLimitDialog) {
-        AlertDialog(
-            onDismissRequest = { showLimitDialog = false },
-            icon = { Icon(Icons.Rounded.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-            title = { Text("Free Limit Reached") },
-            text = { Text("Free users can track up to $FREE_SUBSCRIPTION_LIMIT subscriptions. Upgrade to Pro for unlimited tracking.") },
-            confirmButton = {
-                Button(onClick = { showLimitDialog = false; onPaywallClick() }) {
-                    Text("Upgrade to Pro")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLimitDialog = false }) { Text("Maybe Later") }
-            }
-        )
-    }
 }
 
 @Composable
@@ -607,32 +575,6 @@ private fun SubscriptionRow(
                     modifier = Modifier.size(18.dp)
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun ProBanner(subscriptionCount: Int, onUpgradeClick: () -> Unit) {
-    OutlinedCard(
-        onClick = onUpgradeClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Rounded.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Upgrade to Pro", fontWeight = FontWeight.SemiBold)
-                Text(
-                    "$subscriptionCount/$FREE_SUBSCRIPTION_LIMIT free slots used. Unlock unlimited tracking.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

@@ -35,4 +35,4 @@ data class SavingsTip(
     val suggestion: String
 )
 
-const val FREE_SUBSCRIPTION_LIMIT = 3
+const val FREE_SUBSCRIPTION_LIMIT = Int.MAX_VALUE

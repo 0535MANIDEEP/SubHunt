@@ -32,9 +32,7 @@ class AddEditViewModel @Inject constructor(
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val isAtFreeLimit: StateFlow<Boolean> = combine(_subscriptionCount, billingManager.isSubscribed) { count, subscribed ->
-        count >= FREE_SUBSCRIPTION_LIMIT && !subscribed
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val isAtFreeLimit: StateFlow<Boolean> = MutableStateFlow(false)
 
     private val _saveResult = MutableSharedFlow<SaveResult>()
     val saveResult: SharedFlow<SaveResult> = _saveResult
@@ -45,9 +43,7 @@ class AddEditViewModel @Inject constructor(
         }
     }
 
-    fun canSave(): Boolean {
-        return _subscriptionCount.value < FREE_SUBSCRIPTION_LIMIT || billingManager.isSubscribed.value
-    }
+    fun canSave(): Boolean = true
 
     fun addSubscription(subscription: Subscription) {
         if (!canSave()) {

@@ -43,13 +43,9 @@ class DashboardViewModel @Inject constructor(
 
     val isSubscribed: StateFlow<Boolean> = billingManager.isSubscribed
 
-    val showPaywallDialog: StateFlow<Boolean> = combine(subscriptions, isSubscribed) { subs, subscribed ->
-        subs.size >= FREE_SUBSCRIPTION_LIMIT && !subscribed
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val showPaywallDialog: StateFlow<Boolean> = MutableStateFlow(false)
 
-    fun canAddSubscription(): Boolean {
-        return subscriptions.value.size < FREE_SUBSCRIPTION_LIMIT || isSubscribed.value
-    }
+    fun canAddSubscription(): Boolean = true
 
     fun deleteSubscription(subscription: Subscription) {
         viewModelScope.launch {

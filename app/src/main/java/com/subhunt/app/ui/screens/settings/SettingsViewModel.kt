@@ -82,20 +82,12 @@ class SettingsViewModel @Inject constructor(
 
     fun exportCsv(context: Context, onResult: (ExportResult) -> Unit) {
         viewModelScope.launch {
-            if (!billingManager.isSubscribed.first()) {
-                onResult(ExportResult.Error("Export is a Pro feature. Upgrade to export your data."))
-                return@launch
-            }
             onResult(csvExporter.exportCsv(context))
         }
     }
 
     fun exportJson(context: Context, onResult: (ExportResult) -> Unit) {
         viewModelScope.launch {
-            if (!billingManager.isSubscribed.first()) {
-                onResult(ExportResult.Error("Export is a Pro feature. Upgrade to export your data."))
-                return@launch
-            }
             onResult(csvExporter.exportJson(context))
         }
     }

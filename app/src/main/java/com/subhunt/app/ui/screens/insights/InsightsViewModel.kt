@@ -2,7 +2,6 @@ package com.subhunt.app.ui.screens.insights
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.subhunt.app.billing.BillingManager
 import com.subhunt.app.domain.model.*
 import com.subhunt.app.domain.usecase.GetSubscriptionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,8 +10,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class InsightsViewModel @Inject constructor(
-    getSubscriptions: GetSubscriptionsUseCase,
-    val billingManager: BillingManager
+    getSubscriptions: GetSubscriptionsUseCase
 ) : ViewModel() {
 
     val subscriptions: StateFlow<List<Subscription>> = getSubscriptions()

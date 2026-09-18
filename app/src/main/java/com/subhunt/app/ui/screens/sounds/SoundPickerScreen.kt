@@ -33,7 +33,6 @@ fun SoundPickerScreen(
 ) {
     val globalSoundId by viewModel.globalSoundId.collectAsStateWithLifecycle()
     val subscriptions by viewModel.subscriptions.collectAsStateWithLifecycle()
-    val isSubscribed by viewModel.isSubscribed.collectAsStateWithLifecycle()
     val soundOverrides by viewModel.soundOverrides.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var playingId by remember { mutableStateOf<String?>(null) }
@@ -100,33 +99,21 @@ fun SoundPickerScreen(
 
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                ProSectionHeader(
-                    title = "Pro tones",
-                    isSubscribed = isSubscribed,
-                    onUpgradeClick = onNavigateToPaywall
-                )
+                SectionLabel("Pro tones")
             }
             items(ReminderSounds.PRO) { sound ->
                 SoundRow(
                     sound = sound,
                     selected = globalSoundId == sound.id,
                     playing = playingId == sound.id,
-                    locked = !isSubscribed,
-                    onPreview = { if (isSubscribed) preview(sound) else onNavigateToPaywall() },
-                    onSelect = {
-                        if (isSubscribed) viewModel.selectGlobalSound(sound.id)
-                        else onNavigateToPaywall()
-                    }
+                    onPreview = { preview(sound) },
+                    onSelect = { viewModel.selectGlobalSound(sound.id) }
                 )
             }
 
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                ProSectionHeader(
-                    title = "Per-subscription tones",
-                    isSubscribed = isSubscribed,
-                    onUpgradeClick = onNavigateToPaywall
-                )
+                SectionLabel("Per-subscription tones")
                 Text(
                     "Give each subscription its own vibe. Falls back to the default tone.",
                     style = MaterialTheme.typography.bodySmall,
@@ -146,14 +133,10 @@ fun SoundPickerScreen(
             } else {
                 items(subscriptions, key = { it.id }) { sub ->
                     val overrideId = soundOverrides[sub.id]
-                    val locked = !isSubscribed
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                if (locked) onNavigateToPaywall()
-                                else editingSub = sub
-                            },
+                            .clickable { editingSub = sub },
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Row(
@@ -176,14 +159,6 @@ fun SoundPickerScreen(
                                     else ReminderSounds.byId(overrideId).label,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            if (locked) {
-                                Icon(
-                                    Icons.Rounded.Lock,
-                                    contentDescription = "Pro",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -247,32 +222,10 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-private fun ProSectionHeader(
-    title: String,
-    isSubscribed: Boolean,
-    onUpgradeClick: () -> Unit
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        SectionLabel(title)
-        Spacer(modifier = Modifier.width(8.dp))
-        if (!isSubscribed) {
-            AssistChip(
-                onClick = onUpgradeClick,
-                label = { Text("PRO") },
-                leadingIcon = {
-                    Icon(Icons.Rounded.Star, contentDescription = null, modifier = Modifier.size(14.dp))
-                }
-            )
-        }
-    }
-}
-
-@Composable
 private fun SoundRow(
     sound: ReminderSound,
     selected: Boolean,
     playing: Boolean,
-    locked: Boolean = false,
     onPreview: () -> Unit,
     onSelect: () -> Unit
 ) {
@@ -293,12 +246,10 @@ private fun SoundRow(
         ) {
             IconButton(onClick = onPreview, modifier = Modifier.size(40.dp)) {
                 Icon(
-                    if (locked) Icons.Rounded.Lock
-                    else if (playing) Icons.Rounded.Stop
+                    if (playing) Icons.Rounded.Stop
                     else Icons.Rounded.PlayArrow,
-                    contentDescription = if (locked) "Locked" else "Preview",
-                    tint = if (locked) MaterialTheme.colorScheme.onSurfaceVariant
-                    else MaterialTheme.colorScheme.primary
+                    contentDescription = "Preview",
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))

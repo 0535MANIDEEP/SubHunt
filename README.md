@@ -20,27 +20,24 @@ The average person spends **$273/month** on subscriptions but underestimates by 
 
 SubHunt is a **privacy-first** subscription tracker that runs entirely on your device. No bank linking. No cloud sync. No accounts. Your financial data never leaves your phone.
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |---------|-------------|
-| 📊 **Smart Dashboard** | See total monthly spending, upcoming bills, and subscription health at a glance |
-| 🔔 **Bill Reminders** | Never miss a payment with smart notifications |
-| 📈 **Spending Insights** | Discover which categories eat your budget and find savings |
-| 🎯 **Health Score** | Get a letter grade (A-F) for your subscription habits |
-| 📤 **Export Data** | CSV and JSON export for your records |
-| 🔒 **Privacy First** | All data stays on your device. Always. |
-| 🎨 **Premium UI** | Material 3 design with smooth animations |
-| 🔐 **App Lock** | Biometric or PIN protection for your data |
+| **Smart Dashboard** | See total monthly spending, upcoming bills, and subscription health at a glance |
+| **Bill Reminders** | Never miss a payment with smart notifications |
+| **Spending Insights** | Discover which categories eat your budget and find savings |
+| **Health Score** | Get a letter grade (A-F) for your subscription habits |
+| **Export Data** | CSV and JSON export for your records |
+| **Privacy First** | All data stays on your device. Always. |
+| **Premium UI** | Material 3 design with smooth animations |
+| **App Lock** | Biometric or PIN protection for your data |
+| **Custom Sounds** | Choose reminder tones per subscription |
+| **Unlimited Tracking** | Track as many subscriptions as you want |
 
-## 💰 Pricing
+## Pricing
 
-| Plan | Price | Features |
-|------|-------|----------|
-| **Free** | $0 | Track 3 subscriptions, basic dashboard, reminders |
-| **Pro Monthly** | $4.99/mo | Unlimited subscriptions, insights, health score |
-| **Pro Yearly** | $29.99/yr | Everything in Pro, save 50% |
-| **Lifetime** | $79.99 | Everything in Pro, one-time purchase |
+**Free and open source.** No subscriptions, no paywalls, no activation codes. Everything is included.
 
 ## 📥 Download
 

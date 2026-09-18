@@ -41,8 +41,8 @@ class BillingReminderWorker @AssistedInject constructor(
                     }
                     val message = "You'll be charged $${sub.cost} for ${sub.billingCycle.label.lowercase()} billing"
 
-                    val overrideId = if (isPro) soundPrefs.overrides[sub.id] else null
-                    val sound = ReminderSounds.effective(overrideId ?: soundPrefs.global, isPro)
+                    val overrideId = soundPrefs.overrides[sub.id]
+                    val sound = ReminderSounds.effective(overrideId ?: soundPrefs.global, true)
 
                     NotificationHelper.showBillingReminder(
                         context = applicationContext,

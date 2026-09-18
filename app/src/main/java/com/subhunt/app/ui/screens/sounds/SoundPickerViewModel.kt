@@ -41,9 +41,7 @@ class SoundPickerViewModel @Inject constructor(
 
     fun setOverride(subscriptionId: Long, soundId: String?) {
         viewModelScope.launch {
-            if (billingManager.isSubscribed.first()) {
-                userPreferences.setReminderSoundFor(subscriptionId, soundId)
-            }
+            userPreferences.setReminderSoundFor(subscriptionId, soundId)
         }
     }
 }
