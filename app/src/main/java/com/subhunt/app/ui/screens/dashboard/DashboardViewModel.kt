@@ -2,7 +2,6 @@ package com.subhunt.app.ui.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.subhunt.app.billing.BillingManager
 import com.subhunt.app.domain.model.*
 import com.subhunt.app.domain.usecase.AddSubscriptionUseCase
 import com.subhunt.app.domain.usecase.DeleteSubscriptionUseCase
@@ -18,7 +17,6 @@ class DashboardViewModel @Inject constructor(
     getSubscriptions: GetSubscriptionsUseCase,
     private val addSubscriptionUseCase: AddSubscriptionUseCase,
     private val deleteSubscriptionUseCase: DeleteSubscriptionUseCase,
-    private val billingManager: BillingManager,
     private val widgetRefresher: WidgetRefresher
 ) : ViewModel() {
 
@@ -40,10 +38,6 @@ class DashboardViewModel @Inject constructor(
     val healthScore: StateFlow<HealthScore?> = combine(subscriptions, stats) { subs, s ->
         if (subs.isEmpty()) null else computeHealthScore(s, subs)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
-    val isSubscribed: StateFlow<Boolean> = billingManager.isSubscribed
-
-    val showPaywallDialog: StateFlow<Boolean> = MutableStateFlow(false)
 
     fun canAddSubscription(): Boolean = true
 

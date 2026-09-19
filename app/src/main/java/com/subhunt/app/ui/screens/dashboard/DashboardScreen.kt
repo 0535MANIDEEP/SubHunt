@@ -56,9 +56,7 @@ fun DashboardScreen(
     val healthScore by viewModel.healthScore.collectAsStateWithLifecycle()
     val subscriptions by viewModel.subscriptions.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val isSubscribed by viewModel.isSubscribed.collectAsStateWithLifecycle()
     var showDeleteDialog by remember { mutableStateOf<Subscription?>(null) }
-    var showLimitDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -81,13 +79,7 @@ fun DashboardScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = {
-                    if (viewModel.canAddSubscription()) {
-                        onAddClick()
-                    } else {
-                        showLimitDialog = true
-                    }
-                },
+                onClick = onAddClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)

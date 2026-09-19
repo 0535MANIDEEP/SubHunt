@@ -3,7 +3,6 @@ package com.subhunt.app.notification
 import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
-import com.subhunt.app.billing.BillingManager
 import com.subhunt.app.data.local.SubscriptionDao
 import com.subhunt.app.data.local.UserPreferences
 import dagger.assisted.Assisted
@@ -18,15 +17,13 @@ class BillingReminderWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val subscriptionDao: SubscriptionDao,
-    private val userPreferences: UserPreferences,
-    private val billingManager: BillingManager
+    private val userPreferences: UserPreferences
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         return try {
             val allSubs = subscriptionDao.getAllSubscriptionsList()
             val today = LocalDate.now()
-            val isPro = billingManager.isSubscribed.first()
             val soundPrefs = userPreferences.snapshotSoundPrefs()
 
             allSubs.filter { it.isActive }.forEach { entity ->

@@ -9,7 +9,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
-import com.subhunt.app.billing.BillingManager
 import com.subhunt.app.BuildConfig
 import com.subhunt.app.notification.BillingReminderWorker
 import com.subhunt.app.notification.NotificationHelper
@@ -27,9 +26,6 @@ class SubHuntApp : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
-
-    @Inject
-    lateinit var billingManager: BillingManager
 
     @Inject
     lateinit var appLockManager: AppLockManager
@@ -51,8 +47,6 @@ class SubHuntApp : Application(), Configuration.Provider {
         } catch (e: Exception) {
             if (BuildConfig.DEBUG) Log.e("SubHuntApp", "Failed to init notifications", e)
         }
-
-        // BillingManager restores activation from SharedPreferences on init
 
         // Auto-lock when app goes to background
         ProcessLifecycleOwner.get().lifecycle.addObserver(

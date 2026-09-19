@@ -2,7 +2,6 @@ package com.subhunt.app.ui.screens.sounds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.subhunt.app.billing.BillingManager
 import com.subhunt.app.data.local.UserPreferences
 import com.subhunt.app.domain.model.Subscription
 import com.subhunt.app.domain.usecase.GetSubscriptionsUseCase
@@ -18,11 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SoundPickerViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
-    private val getSubscriptions: GetSubscriptionsUseCase,
-    val billingManager: BillingManager
+    private val getSubscriptions: GetSubscriptionsUseCase
 ) : ViewModel() {
-
-    val isSubscribed: StateFlow<Boolean> = billingManager.isSubscribed
 
     val globalSoundId: StateFlow<String> = userPreferences.reminderSound
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReminderSounds.SYSTEM_DEFAULT_ID)

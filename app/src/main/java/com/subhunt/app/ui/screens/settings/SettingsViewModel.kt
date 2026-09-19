@@ -3,7 +3,6 @@ package com.subhunt.app.ui.screens.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.subhunt.app.billing.BillingManager
 import com.subhunt.app.data.local.UserPreferences
 import com.subhunt.app.export.CsvExporter
 import com.subhunt.app.export.ExportResult
@@ -22,7 +21,6 @@ class SettingsViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val csvExporter: CsvExporter,
     private val appLockManager: AppLockManager,
-    private val billingManager: BillingManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -42,9 +40,6 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val canUseBiometric: Boolean = appLockManager.canUseBiometric()
-
-    val isSubscribed: StateFlow<Boolean> = billingManager.isSubscribed
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun setBiometricAllowed(allowed: Boolean) {
         viewModelScope.launch {

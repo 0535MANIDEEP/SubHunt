@@ -2,8 +2,6 @@ package com.subhunt.app.ui.screens.addedit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.subhunt.app.billing.BillingManager
-import com.subhunt.app.domain.model.FREE_SUBSCRIPTION_LIMIT
 import com.subhunt.app.domain.model.Subscription
 import com.subhunt.app.domain.usecase.AddSubscriptionUseCase
 import com.subhunt.app.domain.usecase.GetSubscriptionByIdUseCase
@@ -21,7 +19,6 @@ class AddEditViewModel @Inject constructor(
     private val updateSubscriptionUseCase: UpdateSubscriptionUseCase,
     private val getSubscriptionById: GetSubscriptionByIdUseCase,
     getSubscriptions: GetSubscriptionsUseCase,
-    private val billingManager: BillingManager,
     private val widgetRefresher: WidgetRefresher
 ) : ViewModel() {
 
