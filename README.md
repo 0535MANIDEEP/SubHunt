@@ -72,7 +72,7 @@ $env:JAVA_HOME = "C:\jbr"
 | Architecture | MVVM + UDF + Repository |
 | DI | Hilt 2.60.1 |
 | Database | Room 2.8.5 |
-| Billing | RevenueCat KMP 3.8.0 |
+| Billing | None — free and open source (activation-code module present but disabled) |
 | Build | AGP 9.0.1 + Gradle 9.1.0 |
 
 ## 📂 Project Structure

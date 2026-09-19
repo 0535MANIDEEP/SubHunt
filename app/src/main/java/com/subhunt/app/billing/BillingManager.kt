@@ -1,8 +1,8 @@
 package com.subhunt.app.billing
 
 // Copyright (c) 2026 Manideep Daram. All rights reserved.
-// Zero-fee activation code system — no RevenueCat, no payment processor fees.
-// User pays via UPI/bank transfer → you verify → send activation code → user enters it here.
+// Free and open source — no paywall, no activation gate.
+// Activation-code module retained for reference but disabled; hasProEntitlement() always returns true.
 
 import android.content.Context
 import android.util.Log
@@ -88,7 +88,7 @@ class BillingManager @Inject constructor(
     }
 
     fun hasProEntitlement(): Boolean {
-        return _isSubscribed.value
+        return true // Free and open source — always entitled
     }
 
     fun getActivationInfo(): String? {
@@ -98,7 +98,7 @@ class BillingManager @Inject constructor(
     }
 
     fun isPlanActive(plan: String): Boolean {
-        return _isSubscribed.value && _activationPlan.value == plan
+        return true // Free and open source — all plans active
     }
 
     private fun restoreActivation() {
